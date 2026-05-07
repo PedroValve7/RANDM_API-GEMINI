@@ -104,8 +104,8 @@ export default async function HomePage() {
 | Estrategia | Pros | Contras | ¿Aplica aquí? |
 |---|---|---|---|
 | **SSG puro** (`generateStaticParams`) | Máxima velocidad — HTML pre-generado en build | Datos desactualizados hasta el próximo deploy |  No ideal si la API agrega personajes |
-| **SSR puro** (sin cache) | Siempre datos frescos | Latencia en cada request (~200-500ms por fetch a la API) | ❌ Innecesario — los personajes cambian poco |
-| **ISR**  | HTML estático + revalidación automática cada N segundos | Ligera "stale window" (máx. 1 hora) | ✅ Balance perfecto |
+| **SSR puro** (sin cache) | Siempre datos frescos | Latencia en cada request (~200-500ms por fetch a la API) |  Innecesario — los personajes cambian poco |
+| **ISR**  | HTML estático + revalidación automática cada N segundos | Ligera "stale window" (máx. 1 hora) |  Balance perfecto |
 
 **Justificación a escala masiva**: Si esta aplicación recibiera 100K+ requests/hora, ISR sirve la página desde el **CDN edge** sin ejecutar el Server Component en cada petición. Solo cada 3600 segundos (1 hora) se re-genera la página en background con datos frescos. Esto reduce la carga en el servidor a prácticamente cero para el contenido principal.
 
@@ -425,7 +425,7 @@ export default nextConfig
 
 ---
 
-## 📄 Licencia
+##  Licencia
 
 Este proyecto fue desarrollado como parte de una prueba técnica.
 
