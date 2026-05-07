@@ -54,9 +54,9 @@ La integración de IA utiliza el **Vercel AI SDK** (`ai` v6) con el proveedor `@
 
 ##  Estrategias de Rendimiento
 
-### 1. Lazy Loading y Code Splitting con `next/dynamic`
+### 1. Lazy Loading y Partial Hydration
 
-**¿Qué componentes se cargan de forma diferida?**
+**¿Qué componentes se cargan de forma diferida y cómo ayuda a la hidratación parcial?**
 
 En esta aplicación, dos componentes se cargan con `next/dynamic` y `{ ssr: false }`:
 
@@ -81,7 +81,7 @@ const AISummary = dynamic(
 )
 ```
 
-**Impacto a escala**: Si la aplicación creciera a cientos de personajes con fichas detalladas, filtros avanzados, y múltiples modelos de IA, el lazy loading garantiza que el **Time to Interactive (TTI)** se mantiene bajo, ya que el bundle inicial solo contiene la grilla y la navbar.
+**Impacto a escala (Tráfico Masivo)**: Si la aplicación creciera a cientos de personajes, el lazy loading y la hidratación parcial garantizan que el **Time to Interactive (TTI)** se mantiene bajo. El bundle inicial solo contiene la grilla, posponiendo la carga y ejecución (hidratación) del JavaScript pesado del modal y la IA hasta que el usuario interactúa.
 
 ### 2. ISR (Incremental Static Regeneration) — Híbrido SSG + SSR
 
@@ -186,6 +186,7 @@ GOOGLE_GENERATIVE_AI_API_KEY=tu_api_key_aquí
 ```
 
 > ** Importante**: El archivo `.env.local` está incluido en `.gitignore` y **nunca se sube al repositorio**. Esto protege tus credenciales.
+> **Nota para CodeSandbox:** Si trabajas o despliegas en **CodeSandbox**, puedes usar la herramienta de **Secrets / Environment Variables** (Variables de Entorno) integrada en la plataforma para configurar `GOOGLE_GENERATIVE_AI_API_KEY` de forma segura.
 
 ### 4. Ejecutar en modo desarrollo
 
