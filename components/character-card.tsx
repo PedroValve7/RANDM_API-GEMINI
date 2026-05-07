@@ -7,6 +7,7 @@ import Image from "next/image"
 type CharacterCardProps = {
   character: Character
   onSelect: (character: Character) => void
+  priority?: boolean
 }
 
 const statusColor: Record<Character["status"], string> = {
@@ -15,7 +16,7 @@ const statusColor: Record<Character["status"], string> = {
   unknown: "bg-muted-foreground",
 }
 
-export function CharacterCard({ character, onSelect }: CharacterCardProps) {
+export function CharacterCard({ character, onSelect, priority = false }: CharacterCardProps) {
   return (
     <button
       type="button"
@@ -33,6 +34,7 @@ export function CharacterCard({ character, onSelect }: CharacterCardProps) {
           alt={character.name}
           width={300}
           height={300}
+          priority={priority}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100">

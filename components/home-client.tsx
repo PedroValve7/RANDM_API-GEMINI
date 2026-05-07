@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 import { AlertCircle } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { CharacterGrid } from "@/components/character-grid"
+import { SearchFilters } from "@/components/search-filters"
 import type { Character } from "@/lib/types"
 
 // Lazy loading del componente de detalles para no cargarlo en el bundle inicial
@@ -19,6 +20,7 @@ export function HomeClient({ initialCharacters }: { initialCharacters: Character
   const [selected, setSelected] = useState<Character | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isFiltering, setIsFiltering] = useState(false)
 
   async function handleSearchById(id: number) {
     setIsSearching(true)
@@ -46,6 +48,41 @@ export function HomeClient({ initialCharacters }: { initialCharacters: Character
     setDetailOpen(true)
   }
 
+  async function handleFiltersChange(filters: { name: string; status: string; species: string; gender: string }) {
+    const hasFilters = filters.name || filters.status || filters.species || filters.gender
+    if (!hasFilters) {
+      setCharacters(initialCharacters)
+      setErrorMessage(null)
+      return
+    }
+
+    setIsFiltering(true)
+    setErrorMessage(null)
+    try {
+      const params = new URLSearchParams()
+      if (filters.name) params.set("name", filters.name)
+      if (filters.status) params.set("status", filters.status)
+      if (filters.species) params.set("species", filters.species)
+      if (filters.gender) params.set("gender", filters.gender)
+
+      const res = await fetch(`https://rickandmortyapi.com/api/character/?${params.toString()}`)
+
+      if (res.status === 404) {
+        setCharacters([])
+        setErrorMessage("No se encontraron personajes con esos filtros.")
+        return
+      }
+      if (!res.ok) throw new Error("Error al consultar la API.")
+
+      const data = await res.json()
+      setCharacters(data.results)
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : "Error al filtrar.")
+    } finally {
+      setIsFiltering(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar onSearch={handleSearchById} isSearching={isSearching} />
@@ -63,6 +100,11 @@ export function HomeClient({ initialCharacters }: { initialCharacters: Character
             inteligencia artificial impulsada por Google Gemini.
           </p>
         </div>
+
+        <SearchFilters
+          onFiltersChange={handleFiltersChange}
+          isSearching={isFiltering}
+        />
 
         {errorMessage && (
           <div
