@@ -11,19 +11,19 @@
 
 ---
 
-## 📑 Tabla de Contenidos
+##  Tabla de Contenidos
 
-- [🏗️ Decisiones Arquitectónicas](#️-decisiones-arquitectónicas)
-- [⚡ Estrategias de Rendimiento](#-estrategias-de-rendimiento)
-- [🔧 Guía de Implementación](#-guía-de-implementación)
-- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
-- [🧩 Componentes Principales](#-componentes-principales)
-- [🔑 Archivos Clave y Fragmentos de Código](#-archivos-clave-y-fragmentos-de-código)
-- [📦 Stack Tecnológico](#-stack-tecnológico)
+- [ Decisiones Arquitectónicas](#️-decisiones-arquitectónicas)
+- [ Estrategias de Rendimiento](#-estrategias-de-rendimiento)
+- [ Guía de Implementación](#-guía-de-implementación)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [ Componentes Principales](#-componentes-principales)
+- [ Archivos Clave y Fragmentos de Código](#-archivos-clave-y-fragmentos-de-código)
+- [ Stack Tecnológico](#-stack-tecnológico)
 
 ---
 
-## 🏗️ Decisiones Arquitectónicas
+##  Decisiones Arquitectónicas
 
 ### ¿Por qué Next.js 16 (App Router)?
 
@@ -52,7 +52,7 @@ La integración de IA utiliza el **Vercel AI SDK** (`ai` v6) con el proveedor `@
 
 ---
 
-## ⚡ Estrategias de Rendimiento
+##  Estrategias de Rendimiento
 
 ### 1. Lazy Loading y Code Splitting con `next/dynamic`
 
@@ -103,9 +103,9 @@ export default async function HomePage() {
 
 | Estrategia | Pros | Contras | ¿Aplica aquí? |
 |---|---|---|---|
-| **SSG puro** (`generateStaticParams`) | Máxima velocidad — HTML pre-generado en build | Datos desactualizados hasta el próximo deploy | ❌ No ideal si la API agrega personajes |
+| **SSG puro** (`generateStaticParams`) | Máxima velocidad — HTML pre-generado en build | Datos desactualizados hasta el próximo deploy |  No ideal si la API agrega personajes |
 | **SSR puro** (sin cache) | Siempre datos frescos | Latencia en cada request (~200-500ms por fetch a la API) | ❌ Innecesario — los personajes cambian poco |
-| **ISR** ✅ | HTML estático + revalidación automática cada N segundos | Ligera "stale window" (máx. 1 hora) | ✅ Balance perfecto |
+| **ISR**  | HTML estático + revalidación automática cada N segundos | Ligera "stale window" (máx. 1 hora) | ✅ Balance perfecto |
 
 **Justificación a escala masiva**: Si esta aplicación recibiera 100K+ requests/hora, ISR sirve la página desde el **CDN edge** sin ejecutar el Server Component en cada petición. Solo cada 3600 segundos (1 hora) se re-genera la página en background con datos frescos. Esto reduce la carga en el servidor a prácticamente cero para el contenido principal.
 
@@ -185,7 +185,7 @@ Edita `.env.local` y reemplaza el valor placeholder con tu API key real:
 GOOGLE_GENERATIVE_AI_API_KEY=tu_api_key_aquí
 ```
 
-> **⚠️ Importante**: El archivo `.env.local` está incluido en `.gitignore` y **nunca se sube al repositorio**. Esto protege tus credenciales.
+> ** Importante**: El archivo `.env.local` está incluido en `.gitignore` y **nunca se sube al repositorio**. Esto protege tus credenciales.
 
 ### 4. Ejecutar en modo desarrollo
 
@@ -224,7 +224,7 @@ GOOGLE_GENERATIVE_AI_API_KEY=your_google_gemini_api_key_here
 
 ---
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 RANDM_API-GEMINI/
@@ -260,7 +260,7 @@ RANDM_API-GEMINI/
 
 ---
 
-## 🧩 Componentes Principales
+##  Componentes Principales
 
 ### Flujo de datos de la aplicación
 
@@ -303,7 +303,7 @@ RANDM_API-GEMINI/
 
 ---
 
-## 🔑 Archivos Clave y Fragmentos de Código
+##  Archivos Clave y Fragmentos de Código
 
 ### `app/page.tsx` — Entry Point con ISR
 
@@ -407,7 +407,7 @@ export default nextConfig
 
 ---
 
-## 📦 Stack Tecnológico
+##  Stack Tecnológico
 
 | Categoría | Tecnología | Versión |
 |---|---|---|
