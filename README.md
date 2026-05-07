@@ -1,50 +1,311 @@
-# RANDM_API-GEMINI
-Proyecto Personal
-# Documentación del Proyecto: Rick and Morty Multiverse Explorer
+# 🌀 Rick and Morty — Multiverse Explorer
 
-Este documento detalla la arquitectura, optimizaciones visuales y de rendimiento, y la integración de backend de la aplicación. El proyecto está construido con **Next.js (App Router)**, incorporando mejores prácticas modernas como Server Components, ISR (Incremental Static Regeneration), optimización de imágenes y lazy loading. Además, incluye inteligencia artificial para generar resúmenes dinámicos de los personajes.
+> Aplicación web interactiva para explorar el multiverso de Rick and Morty, con búsqueda por ID, galería de personajes y resúmenes creativos generados por **Google Gemini AI**.
 
----
-
-## 1. Optimizaciones de Rendimiento y Visuales
-
-El proyecto ha sido optimizado para cargar rápido y proporcionar una experiencia de usuario fluida y estética.
-
-### Incremental Static Regeneration (ISR)
-La página principal (`app/page.tsx`) utiliza ISR para cachear la respuesta de la API original de Rick and Morty y revalidarla cada hora (3600 segundos). Esto reduce drásticamente las peticiones a la API externa y acelera el tiempo de carga inicial.
-
-### Optimización de Imágenes
-Se ha reemplazado el uso de la etiqueta `<img>` estándar por el componente `<Image>` de Next.js (`next/image`). Este componente se encarga de servir las imágenes en formatos modernos (como WebP), comprimirlas y aplicar *lazy loading* (carga diferida).
-
-> [!TIP]
-> **Configuración en `next.config.mjs`:** Para permitir que Next.js optimice imágenes desde un dominio externo, se configuró `remotePatterns` apuntando a `rickandmortyapi.com`.
-
-### Lazy Loading con `next/dynamic`
-Componentes pesados o que no son críticos para la primera vista, como el modal de detalles del personaje (`CharacterDetail`) y el generador de resumen IA (`AISummary`), se cargan dinámicamente usando `next/dynamic`. Esto divide el código (code splitting) y reduce el tamaño del *bundle* inicial de Javascript.
-
-### Diseño y UI
-- **Tailwind CSS + Radix UI**: Se utiliza un sistema de diseño robusto y accesible.
-- **Lucide React**: Biblioteca de iconos ligeros.
-- **Animaciones y Dark Mode**: Uso de clases utilitarias para micro-interacciones (ej. `animate-fade-in`, `text-glow`) y manejo de paletas oscuras estéticas.
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.2-06B6D4?logo=tailwindcss)
+![Vercel AI SDK](https://img.shields.io/badge/Vercel_AI_SDK-6.0-000?logo=vercel)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
-## 2. API y Backend Integrado
+## 📑 Tabla de Contenidos
 
-El proyecto utiliza las Server API Routes de Next.js para proteger claves de API y ejecutar procesos seguros del lado del servidor.
-
-### API de Resumen con IA (Google Gemini)
-El archivo `app/api/summary/route.ts` expone un endpoint POST que recibe los datos de un personaje y utiliza el **Vercel AI SDK** en conjunto con el modelo **Google Gemini (`gemini-flash-latest`)** para generar un resumen creativo de 3 líneas del personaje. 
-
-> [!IMPORTANT]
-> **Seguridad**: Todo el proceso de IA ocurre en el backend (`route.ts`). El frontend (`components/ai-summary.tsx`) sólo realiza un fetch a nuestro propio endpoint `/api/summary`, manteniendo seguras las credenciales de Google AI.
+- [🏗️ Decisiones Arquitectónicas](#️-decisiones-arquitectónicas)
+- [⚡ Estrategias de Rendimiento](#-estrategias-de-rendimiento)
+- [🔧 Guía de Implementación](#-guía-de-implementación)
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🧩 Componentes Principales](#-componentes-principales)
+- [🔑 Archivos Clave y Fragmentos de Código](#-archivos-clave-y-fragmentos-de-código)
+- [📦 Stack Tecnológico](#-stack-tecnológico)
 
 ---
 
-## 3. Archivos Clave y Fragmentos de Código
+## 🏗️ Decisiones Arquitectónicas
 
-### `app/page.tsx` (Entry Point & ISR)
-Este Server Component hace el fetching inicial con la estrategia de revalidación.
+### ¿Por qué Next.js 16 (App Router)?
+
+Se eligió **Next.js** como framework principal por las siguientes razones estratégicas:
+
+| Criterio | Justificación |
+|---|---|
+| **Server Components** | El App Router de Next.js permite que `app/page.tsx` sea un **React Server Component** por defecto. El fetching inicial a la Rick and Morty API ocurre **en el servidor**, eliminando waterfalls en el cliente y reduciendo el JavaScript enviado al navegador. |
+| **API Routes integradas** | Next.js permite crear endpoints backend (`app/api/summary/route.ts`) dentro del mismo proyecto, sin necesidad de un servidor externo. Esto es crítico para proteger la API key de Gemini: la clave **nunca llega al navegador**. |
+| **Optimización de imágenes** | El componente `next/image` sirve las 20+ imágenes de personajes en formato WebP, con lazy loading nativo y redimensionado automático, sin configuración adicional más allá de `remotePatterns`. |
+| **ISR (Incremental Static Regeneration)** | Permite servir páginas estáticas con revalidación automática, combinando lo mejor de SSG y SSR sin rebuild completo. |
+| **Ecosistema y DX** | Soporte nativo para TypeScript, Tailwind CSS 4, Google Fonts (`next/font`), y el Vercel AI SDK. Todo funciona out-of-the-box. |
+
+### ¿Por qué Tailwind CSS 4 + Radix UI?
+
+- **Tailwind CSS 4**: Sistema utility-first que permite construir interfaces consistentes con tokens de diseño (colores, espaciados, tipografía) definidos en CSS variables. Se aprovechan las clases utilitarias para micro-animaciones (`animate-fade-in`, `animate-slide-up`) y efectos visuales (`text-glow`, `glow-primary`).
+- **Radix UI**: Proporciona componentes headless accesibles (Dialog, Button, etc.) que cumplen con WAI-ARIA por defecto, permitiendo estilizar libremente con Tailwind sin sacrificar accesibilidad.
+
+### ¿Por qué Vercel AI SDK + Google Gemini?
+
+La integración de IA utiliza el **Vercel AI SDK** (`ai` v6) con el proveedor `@ai-sdk/google`:
+
+- **Abstracción unificada**: El SDK ofrece una API declarativa (`generateText()`) que abstrae la complejidad de comunicarse con diferentes proveedores de IA. Si en el futuro se quisiera migrar a OpenAI o Anthropic, el cambio sería de una línea.
+- **Modelo `gemini-flash-latest`**: Se seleccionó este modelo por su balance entre velocidad de respuesta (< 2s) y calidad de generación para textos cortos (resúmenes de 3 líneas).
+- **Seguridad**: La llamada a Gemini ocurre exclusivamente en el Route Handler (`app/api/summary/route.ts`). El frontend solo hace un `fetch` a `/api/summary`, garantizando que la `GOOGLE_GENERATIVE_AI_API_KEY` nunca se expone al cliente.
+
+---
+
+## ⚡ Estrategias de Rendimiento
+
+### 1. Lazy Loading y Code Splitting con `next/dynamic`
+
+**¿Qué componentes se cargan de forma diferida?**
+
+En esta aplicación, dos componentes se cargan con `next/dynamic` y `{ ssr: false }`:
+
+| Componente | Razón del Lazy Loading |
+|---|---|
+| `CharacterDetail` | Es un modal que solo se renderiza cuando el usuario hace clic en un personaje. No tiene sentido incluir ~5KB de lógica de Dialog + Image + layout en el bundle inicial. |
+| `AISummary` | Se carga dentro de `CharacterDetail` y solo se activa bajo demanda cuando el usuario presiona "Generar resumen con IA". Incluye lógica de fetch y estados de loading/error que no son necesarios hasta la interacción. |
+
+**Implementación real en el proyecto:**
+
+```tsx
+// components/home-client.tsx — Lazy loading del modal de detalles
+const CharacterDetail = dynamic(
+  () => import("@/components/character-detail").then((mod) => mod.CharacterDetail),
+  { ssr: false }
+)
+
+// components/character-detail.tsx — Lazy loading del componente de IA
+const AISummary = dynamic(
+  () => import("@/components/ai-summary").then((mod) => mod.AISummary),
+  { ssr: false }
+)
+```
+
+**Impacto a escala**: Si la aplicación creciera a cientos de personajes con fichas detalladas, filtros avanzados, y múltiples modelos de IA, el lazy loading garantiza que el **Time to Interactive (TTI)** se mantiene bajo, ya que el bundle inicial solo contiene la grilla y la navbar.
+
+### 2. ISR (Incremental Static Regeneration) — Híbrido SSG + SSR
+
+**¿Cómo se implementa?**
+
+La página principal (`app/page.tsx`) es un **Server Component** que realiza el fetch con `next: { revalidate: 3600 }`:
+
+```tsx
+// app/page.tsx
+export default async function HomePage() {
+  const res = await fetch("https://rickandmortyapi.com/api/character", {
+    next: { revalidate: 3600 }, // Revalidar cada hora
+  })
+  // ...
+}
+```
+
+**¿Por qué ISR y no SSG puro o SSR puro?**
+
+| Estrategia | Pros | Contras | ¿Aplica aquí? |
+|---|---|---|---|
+| **SSG puro** (`generateStaticParams`) | Máxima velocidad — HTML pre-generado en build | Datos desactualizados hasta el próximo deploy | ❌ No ideal si la API agrega personajes |
+| **SSR puro** (sin cache) | Siempre datos frescos | Latencia en cada request (~200-500ms por fetch a la API) | ❌ Innecesario — los personajes cambian poco |
+| **ISR** ✅ | HTML estático + revalidación automática cada N segundos | Ligera "stale window" (máx. 1 hora) | ✅ Balance perfecto |
+
+**Justificación a escala masiva**: Si esta aplicación recibiera 100K+ requests/hora, ISR sirve la página desde el **CDN edge** sin ejecutar el Server Component en cada petición. Solo cada 3600 segundos (1 hora) se re-genera la página en background con datos frescos. Esto reduce la carga en el servidor a prácticamente cero para el contenido principal.
+
+### 3. Optimización de Imágenes con `next/image`
+
+Todas las imágenes de personajes usan el componente `<Image>` de Next.js en lugar de `<img>`:
+
+```tsx
+<Image
+  src={character.image}
+  alt={character.name}
+  width={300}
+  height={300}
+  className="h-full w-full object-cover"
+/>
+```
+
+**Beneficios concretos:**
+- **Formato moderno**: Sirve automáticamente WebP/AVIF según el soporte del navegador.
+- **Lazy loading nativo**: Las imágenes fuera del viewport no se descargan hasta que el usuario hace scroll.
+- **Dimensionado óptimo**: Genera múltiples tamaños (`srcset`) para que cada dispositivo descargue la resolución adecuada.
+- **Configuración**: Se habilitó el dominio externo en `next.config.mjs`:
+
+```javascript
+images: {
+  remotePatterns: [
+    { protocol: "https", hostname: "rickandmortyapi.com" },
+  ],
+}
+```
+
+### 4. Tipografía optimizada con `next/font`
+
+Se usan **Google Fonts** cargadas localmente para evitar layout shifts (CLS):
+
+```tsx
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-sans", display: "swap" })
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" })
+```
+
+`next/font` descarga las fuentes en build time y las sirve como archivos estáticos, eliminando la dependencia del CDN de Google Fonts en runtime.
+
+---
+
+## 🔧 Guía de Implementación
+
+### Prerrequisitos
+
+- **Node.js** ≥ 18.17
+- **npm** ≥ 9 (incluido con Node.js)
+- **API Key de Google Gemini** — [Obtener aquí](https://aistudio.google.com/app/apikey)
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/PedroValve7/RANDM_API-GEMINI.git
+cd RANDM_API-GEMINI
+```
+
+### 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 3. Configurar variables de entorno
+
+Crea un archivo `.env.local` en la raíz del proyecto tomando como referencia el archivo `.env.example`:
+
+```bash
+cp .env.example .env.local
+```
+
+Edita `.env.local` y reemplaza el valor placeholder con tu API key real:
+
+```env
+GOOGLE_GENERATIVE_AI_API_KEY=tu_api_key_aquí
+```
+
+> **⚠️ Importante**: El archivo `.env.local` está incluido en `.gitignore` y **nunca se sube al repositorio**. Esto protege tus credenciales.
+
+### 4. Ejecutar en modo desarrollo
+
+```bash
+npm run dev
+```
+
+La aplicación estará disponible en **http://localhost:3000**.
+
+### 5. Build de producción (opcional)
+
+```bash
+npm run build
+npm start
+```
+
+### Configuración en Vercel (Deploy)
+
+Si despliegas en Vercel, configura la variable de entorno desde el dashboard:
+
+1. Ve a **Settings → Environment Variables**
+2. Agrega:
+   - **Name**: `GOOGLE_GENERATIVE_AI_API_KEY`
+   - **Value**: tu API key de Gemini
+3. Redeploy
+
+### Referencia: `.env.example`
+
+El repositorio incluye un archivo `.env.example` como referencia:
+
+```env
+# API Key de Google Gemini para la generación de resúmenes con IA
+# Obtén tu key en: https://aistudio.google.com/app/apikey
+GOOGLE_GENERATIVE_AI_API_KEY=your_google_gemini_api_key_here
+```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+RANDM_API-GEMINI/
+├── app/
+│   ├── api/
+│   │   └── summary/
+│   │       └── route.ts          # Endpoint POST — Genera resúmenes con Gemini AI
+│   ├── globals.css               # Estilos globales y tokens de diseño
+│   ├── layout.tsx                # Layout raíz (fonts, metadata, analytics)
+│   └── page.tsx                  # Entry point — Server Component con ISR
+├── components/
+│   ├── ui/                       # Componentes base Radix UI + shadcn/ui
+│   ├── ai-summary.tsx            # Botón y display del resumen generado por IA
+│   ├── character-card.tsx        # Tarjeta individual de personaje
+│   ├── character-detail.tsx      # Modal con información completa + IA
+│   ├── character-grid.tsx        # Grilla responsive de personajes
+│   ├── home-client.tsx           # Client Component principal (estado y lógica)
+│   ├── navbar.tsx                # Barra de navegación con buscador por ID
+│   └── theme-provider.tsx        # Provider para dark/light mode
+├── hooks/                        # Custom React hooks
+├── lib/
+│   ├── types.ts                  # Tipos TypeScript (Character, CharactersResponse)
+│   └── utils.ts                  # Utilidades (cn helper para clsx + tailwind-merge)
+├── public/                       # Assets estáticos
+├── styles/                       # Estilos adicionales
+├── .env.example                  # Referencia de variables de entorno
+├── .env.local                    # Variables reales (NO se sube a git)
+├── next.config.mjs               # Configuración de Next.js (imágenes, TypeScript)
+├── package.json                  # Dependencias y scripts
+├── tsconfig.json                 # Configuración de TypeScript
+└── vercel.json                   # Configuración de deploy en Vercel
+```
+
+---
+
+## 🧩 Componentes Principales
+
+### Flujo de datos de la aplicación
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  app/page.tsx (Server Component)                                 │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │ fetch("rickandmortyapi.com/api/character")                 │  │
+│  │ ISR: revalidate = 3600s                                    │  │
+│  └────────────────┬───────────────────────────────────────────┘  │
+│                   │ initialCharacters[]                          │
+│                   ▼                                              │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │ HomeClient (Client Component)                              │  │
+│  │  ├── Navbar → búsqueda por ID → fetch API                 │  │
+│  │  ├── CharacterGrid → renderiza CharacterCard[]             │  │
+│  │  └── CharacterDetail (lazy) → Dialog modal                │  │
+│  │       └── AISummary (lazy) → POST /api/summary            │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  app/api/summary/route.ts (Server-side)                          │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │ generateText() → Google Gemini (gemini-flash-latest)       │  │
+│  │ GOOGLE_GENERATIVE_AI_API_KEY (protegida en el servidor)    │  │
+│  └────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Descripción de componentes
+
+| Componente | Tipo | Responsabilidad |
+|---|---|---|
+| `app/page.tsx` | Server Component | Fetch inicial con ISR, pasa datos al cliente |
+| `HomeClient` | Client Component | Maneja estado (búsqueda, selección, errores), orquesta la UI |
+| `Navbar` | Client Component | Barra de navegación con input de búsqueda por ID |
+| `CharacterGrid` | Client Component | Renderiza la grilla responsive de `CharacterCard` |
+| `CharacterCard` | Client Component | Tarjeta visual con imagen, nombre, status y especie |
+| `CharacterDetail` | Client (lazy) | Modal con información detallada del personaje |
+| `AISummary` | Client (lazy) | Botón para generar y mostrar el resumen de Gemini AI |
+
+---
+
+## 🔑 Archivos Clave y Fragmentos de Código
+
+### `app/page.tsx` — Entry Point con ISR
 
 ```tsx
 import { HomeClient } from "@/components/home-client"
@@ -66,8 +327,7 @@ export default async function HomePage() {
 }
 ```
 
-### `app/api/summary/route.ts` (Endpoint de Inteligencia Artificial)
-Maneja la conexión segura con Gemini y el prompt personalizado.
+### `app/api/summary/route.ts` — Endpoint de Inteligencia Artificial
 
 ```typescript
 import { generateText } from "ai"
@@ -85,18 +345,20 @@ export async function POST(req: Request) {
 
     const { text } = await generateText({
       model: google("gemini-flash-latest"),
-      prompt: `Basado en los siguientes datos JSON de un personaje, escribe un párrafo de 3 líneas describiéndolo de forma creativa para un fan de la ciencia ficción. Responde solo con el párrafo, sin encabezados ni comillas.\n\n${JSON.stringify(character, null, 2)}`,
+      prompt: `Eres un explorador intergaláctico del universo de Rick & Morty. Basado en los siguientes datos JSON de un personaje, escribe un párrafo de 3 líneas describiéndolo de forma MUY creativa, con un toque de humor cínico o científico loco. Responde solo con el párrafo, sin encabezados ni comillas.\n\n${JSON.stringify(character, null, 2)}`,
     })
 
     return Response.json({ summary: text })
   } catch (error) {
-    return Response.json({ error: "No se pudo generar el resumen." }, { status: 500 })
+    return Response.json(
+      { error: "No se pudo generar el resumen. Verifica la configuración de la IA." },
+      { status: 500 }
+    )
   }
 }
 ```
 
-### `components/character-detail.tsx` (Code Splitting y next/image)
-Demuestra cómo cargar componentes asíncronamente y optimizar imágenes.
+### `components/character-detail.tsx` — Code Splitting y `next/image`
 
 ```tsx
 import dynamic from "next/dynamic"
@@ -109,75 +371,33 @@ const AISummary = dynamic(
 )
 
 export function CharacterDetail({ character, open, onOpenChange }: CharacterDetailProps) {
-  // ...
   return (
-    // ...
-    <div className="overflow-hidden rounded-lg border border-border bg-muted">
-      <Image
-        src={character.image || "/placeholder.svg"}
-        alt={character.name}
-        width={300}
-        height={300}
-        className="h-full w-full object-cover"
-      />
-    </div>
-    // ...
-    <AISummary character={character} />
-    // ...
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <Image
+          src={character.image}
+          alt={character.name}
+          width={300}
+          height={300}
+          className="h-full w-full object-cover"
+        />
+        {/* ... datos del personaje ... */}
+        <AISummary character={character} />
+      </DialogContent>
+    </Dialog>
   )
 }
 ```
 
-### `components/home-client.tsx` (Estado del Cliente y Lazy Loading Global)
-Este Client Component maneja el estado de la aplicación, como las búsquedas y el modal.
-
-```tsx
-"use client"
-import dynamic from "next/dynamic"
-import { useState } from "react"
-
-// Lazy loading del componente de detalles para no cargarlo en el bundle inicial
-const CharacterDetail = dynamic(
-  () => import("@/components/character-detail").then((mod) => mod.CharacterDetail),
-  { ssr: false }
-)
-
-export function HomeClient({ initialCharacters }: { initialCharacters: Character[] }) {
-  const [selected, setSelected] = useState<Character | null>(null)
-  const [detailOpen, setDetailOpen] = useState(false)
-  
-  // Lógica de búsqueda y selección...
-  
-  return (
-    <div>
-      {/* Navbar y Grid... */}
-      
-      {/* El componente se cargará de forma diferida */}
-      <CharacterDetail
-        character={selected}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
-    </div>
-  )
-}
-```
-
-### `next.config.mjs` (Configuración de Imágenes)
-Habilita la carga de imágenes remotas para el componente `<Image>`.
+### `next.config.mjs` — Configuración de Imágenes Remotas
 
 ```javascript
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  typescript: { ignoreBuildErrors: true },
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "rickandmortyapi.com",
-      },
+      { protocol: "https", hostname: "rickandmortyapi.com" },
     ],
   },
 }
@@ -187,9 +407,25 @@ export default nextConfig
 
 ---
 
-## Resumen de Tecnologías Implementadas
-- **Framework:** Next.js 14+ (App Router)
-- **Estilos:** Tailwind CSS, Radix UI
-- **Optimizaciones:** Next/Image, Next/Dynamic (Lazy Loading), ISR (Revalidación de caché).
-- **Inteligencia Artificial:** Vercel AI SDK con `@ai-sdk/google` (Modelo `gemini-flash-latest`).
+## 📦 Stack Tecnológico
 
+| Categoría | Tecnología | Versión |
+|---|---|---|
+| **Framework** | Next.js (App Router) | 16.2.4 |
+| **UI Library** | React | 19 |
+| **Lenguaje** | TypeScript | 5.7.3 |
+| **Estilos** | Tailwind CSS | 4.2 |
+| **Componentes UI** | Radix UI + shadcn/ui | Últimas |
+| **Iconos** | Lucide React | 0.564 |
+| **IA** | Vercel AI SDK + `@ai-sdk/google` | 6.0 / 3.0 |
+| **Modelo IA** | Google Gemini (`gemini-flash-latest`) | — |
+| **Analytics** | Vercel Analytics | 1.6.1 |
+| **Deploy** | Vercel | — |
+
+---
+
+## 📄 Licencia
+
+Este proyecto fue desarrollado como parte de una prueba técnica.
+
+Datos provistos por [rickandmortyapi.com](https://rickandmortyapi.com) · IA por Google Gemini vía Vercel AI SDK.
