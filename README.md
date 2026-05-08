@@ -2,7 +2,7 @@
 
 > Aplicación web interactiva para explorar el multiverso de Rick and Morty, con búsqueda por ID, galería de personajes y resúmenes creativos generados por **Google Gemini AI**.
 
-### 🚀 [Ver Aplicación en Vivo (Vercel)](https://randmortyapi-4uk8tebxv-pedrovalve7s-projects.vercel.app/) | 💻 [Ver en Replit](https://c4883c7c-251c-4ca6-bbad-f195c879d916-00-1jcmoyflqz4ju.riker.replit.dev/)
+###  [Ver Aplicación en Vivo (Vercel)](https://randmortyapi-4uk8tebxv-pedrovalve7s-projects.vercel.app/) | 💻 [Ver en Replit](https://c4883c7c-251c-4ca6-bbad-f195c879d916-00-1jcmoyflqz4ju.riker.replit.dev/)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript)
