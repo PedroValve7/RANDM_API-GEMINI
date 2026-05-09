@@ -4,6 +4,8 @@
 
 ###  [Ver Aplicación en Vivo (Vercel)](https://randmortyapi.vercel.app/) |  [Ver en Replit](https://randmapi-gemini--palajo1.replit.app/)
 Pitch Deck https://randmapi-gemini--palajo1.replit.app/pitch-deck/
+
+
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript)
